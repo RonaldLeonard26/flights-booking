@@ -2,11 +2,11 @@ import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function Home() {
-  const supabase = await createClient();
+  // const supabase = await createClient();
 
-  const { data, error } = await supabase.from('flights').select('*');
+  // const { data, error } = await supabase.from('flights').select('*');
 
-  console.log(data, error);
+  // console.log(data, error);
   return (
     <div>
       <Button>Click Me</Button>
