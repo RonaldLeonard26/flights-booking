@@ -1,3 +1,4 @@
+import { LoginPayload } from '@/app/auth/login/components/useSignIn';
 import { RegisterPayload } from '@/app/auth/register/components/useSignUp';
 import { createBrowserClient } from '@supabase/ssr';
 
@@ -12,6 +13,7 @@ export const authServices = {
       email: payload.email,
       password: payload.password,
       options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         data: {
           full_name: payload.fullName,
           username: payload.userName,
@@ -21,6 +23,17 @@ export const authServices = {
     if (error) throw error;
     return data;
   },
-  async login() {},
-  async logout() {},
+  async login(payload: LoginPayload) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: payload.email,
+      password: payload.password,
+    });
+
+    if (error) throw error;
+    return data;
+  },
+  async logout() {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  },
 };
