@@ -13,6 +13,13 @@ export const columns: ColumnDef<Airplane>[] = [
   {
     accessorKey: 'image',
     header: 'Image',
+    cell: ({ row }) => (
+      <img
+        src={row.original.image}
+        alt="airplane"
+        className="w-16 h-10 object-cover rounded"
+      />
+    ),
   },
   {
     accessorKey: 'name',
