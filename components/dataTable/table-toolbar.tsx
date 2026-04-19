@@ -1,6 +1,5 @@
 'use client';
-
-import { Button } from '../ui/button';
+import AddAirplaneModal from '@/app/admin/airplane/components/modal/add-modal';
 import { Input } from '../ui/input';
 
 export interface PropsTypes {
@@ -20,7 +19,7 @@ export default function TableToolbar({
         onChange={(e) => setGlobalFilter(e.target.value)}
         className="max-w-sm w-64"
       />
-      <Button className="bg-gray-500">Add Airplane</Button>
+      <AddAirplaneModal />
     </div>
   );
 }
