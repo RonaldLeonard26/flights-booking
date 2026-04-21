@@ -1,3 +1,6 @@
+'use client';
+
+import InputFile from '@/components/input-file';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -22,7 +25,9 @@ export default function AirplaneForm() {
               placeholder="Input airplane code here..."
             />
           </div>
-          <div>Input File</div>
+          <div>
+            <InputFile name="input" isDropable />
+          </div>
         </div>
       </form>
     </div>
