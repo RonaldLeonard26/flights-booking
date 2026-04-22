@@ -2,11 +2,11 @@
 
 import { Upload } from 'lucide-react';
 import Image from 'next/image';
-import { ChangeEvent, useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 interface PropsTypes {
   name: string;
-  isDropable: boolean;
+  isDropable?: boolean;
 }
 
 export default function InputFile(props: PropsTypes) {
@@ -14,58 +14,73 @@ export default function InputFile(props: PropsTypes) {
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
-  const drop = useRef<HTMLLabelElement>(null);
+  const dropRef = useRef<HTMLLabelElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const dropzoneId = useId();
 
-  const handleDragOver = (e: DragEvent) => {
-    if (isDropable) {
-      (e.preventDefault(), e.stopPropagation());
+  // Fungsi helper untuk menangani file dan preview sekaligus
+  const handleFileAction = (file: File | null) => {
+    if (preview) URL.revokeObjectURL(preview); //hapus preview lama jika ada
+
+    if (file) {
+      setUploadedImage(file);
+      setPreview(URL.createObjectURL(file));
+    } else {
+      setUploadedImage(null);
+      setPreview(null);
     }
   };
 
-  const handleDrop = (e: DragEvent) => {
-    e.preventDefault();
-    setUploadedImage(e.dataTransfer?.files?.[0] || null);
-  };
-
+  // pasang event listener ke ref untuk handleDrop
   useEffect(() => {
-    const dropCurrent = drop.current;
-    if (dropCurrent) {
-      dropCurrent.addEventListener('dragover', handleDragOver);
-      dropCurrent.addEventListener('drop', handleDrop);
+    const dropCurrent = dropRef.current;
+
+    const preventDefault = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const onDrop = (e: DragEvent) => {
+      preventDefault(e);
+      if (isDropable && e.dataTransfer?.files?.[0]) {
+        const file = e.dataTransfer.files[0];
+        handleFileAction(file);
+
+        // sinkron ke input asli agar form tetap valid
+        if (inputRef.current) {
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(file);
+          inputRef.current.files = dataTransfer.files;
+        }
+      }
+    };
+
+    if (dropCurrent && isDropable) {
+      dropCurrent.addEventListener('dragover', preventDefault);
+      dropCurrent.addEventListener('dragenter', preventDefault);
+      dropCurrent.addEventListener('drop', onDrop);
 
       return () => {
-        dropCurrent.removeEventListener('dragover', handleDragOver);
-        dropCurrent.removeEventListener('drop', handleDrop);
+        dropCurrent.removeEventListener('dragover', preventDefault);
+        dropCurrent.removeEventListener('dragenter', preventDefault);
+        dropCurrent.removeEventListener('drop', onDrop);
       };
     }
-  }, []);
-
-  const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.currentTarget.files;
-    if (files && files.length > 0) {
-      setUploadedImage(files[0]);
-    }
-  };
+  }, [isDropable, preview]);
 
   return (
     <label
-      ref={drop}
+      ref={dropRef}
       htmlFor={`dropzone-file${dropzoneId}`}
       className="w-full min-h-24 flex flex-coll  border-2 border-dashed rounded-lg p-6 items-center justify-center cursor-pointer bg-gray-50 hover:bg-gray-100"
     >
-      {uploadedImage ? (
+      {preview ? (
         <div className=" relative flex flex-col items-center justify-center p-4">
           <div className=" relative w-1/2 mb-2">
-            <Image
-              fill
-              src={URL.createObjectURL(uploadedImage)}
-              alt="image"
-              className="relative!"
-            />
+            <Image fill src={preview} alt="image" className="relative!" />
           </div>
           <p className="text-sm font-semibold text-center text-gray-500">
-            {uploadedImage.name}
+            {uploadedImage?.name}
           </p>
         </div>
       ) : (
@@ -84,7 +99,7 @@ export default function InputFile(props: PropsTypes) {
         className="hidden"
         accept="image/*"
         id={`dropzone-file${dropzoneId}`}
-        onChange={handleOnChange}
+        onChange={(e) => handleFileAction(e.target.files?.[0] || null)}
       />
     </label>
   );

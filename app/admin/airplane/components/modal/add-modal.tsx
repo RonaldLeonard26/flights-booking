@@ -18,7 +18,7 @@ export default function AddAirplaneModal() {
         <Button variant="outline">Add Airplane</Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>Add Airplane</DialogTitle>
           <DialogDescription>
