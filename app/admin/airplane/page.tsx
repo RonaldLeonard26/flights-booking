@@ -1,4 +1,4 @@
-import Airplane from './components/airplane';
+import Airplane from './airplane';
 
 export default function AirplanePage() {
   return <Airplane />;

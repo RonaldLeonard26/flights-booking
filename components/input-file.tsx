@@ -7,12 +7,14 @@ import { useEffect, useId, useRef, useState } from 'react';
 interface PropsTypes {
   name: string;
   isDropable?: boolean;
+  defaultValue?: string;
+  onChange?: (file: File | null) => void;
 }
 
 export default function InputFile(props: PropsTypes) {
-  const { name, isDropable = false } = props;
+  const { name, isDropable = false, defaultValue, onChange } = props;
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(defaultValue || null);
 
   const dropRef = useRef<HTMLLabelElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -25,9 +27,11 @@ export default function InputFile(props: PropsTypes) {
     if (file) {
       setUploadedImage(file);
       setPreview(URL.createObjectURL(file));
+      props.onChange?.(file); //kirim file ke react-hook-form
     } else {
       setUploadedImage(null);
       setPreview(null);
+      onChange?.(null);
     }
   };
 
@@ -72,7 +76,7 @@ export default function InputFile(props: PropsTypes) {
     <label
       ref={dropRef}
       htmlFor={`dropzone-file${dropzoneId}`}
-      className="w-full min-h-24 flex flex-coll  border-2 border-dashed rounded-lg p-6 items-center justify-center cursor-pointer bg-gray-50 hover:bg-gray-100"
+      className="w-full min-h-24 h-36 flex flex-coll  border-2 border-dashed rounded-lg p-6 items-center justify-center cursor-pointer bg-gray-50 hover:bg-gray-100"
     >
       {preview ? (
         <div className=" relative flex flex-col items-center justify-center p-4">
@@ -85,7 +89,7 @@ export default function InputFile(props: PropsTypes) {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center p-4">
-          <Upload className="mb-2 w-10 h-10  text-gray-400" />
+          <Upload className="mb-2 w-8 h-8  text-gray-400" />
           <p className="text-sm font-semibold text-center text-gray-500">
             {isDropable
               ? 'Drag and drop or click to upload image'

@@ -7,28 +7,34 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useState } from 'react';
 import AirplaneForm from '../form/form-add-airplane';
+import { useState } from 'react';
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { Airplanes } from '@/components/dataTable/columns';
+import FormEditAirplane from '../form/form-edit-airplane';
 
-export default function AddAirplaneModal() {
+export default function EditAirplaneModal({
+  airplane,
+}: {
+  airplane: Airplanes;
+}) {
   const [open, setOpen] = useState(false);
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" suppressHydrationWarning>
-          Add Airplane
-        </Button>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          Edit
+        </DropdownMenuItem>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-sm ">
         <DialogHeader>
-          <DialogTitle>Add Airplane</DialogTitle>
+          <DialogTitle>Edit Airplane</DialogTitle>
           <DialogDescription>
-            Fill the form below to add a new airplane.
+            Fill the form below to edit airplane.
           </DialogDescription>
         </DialogHeader>
-        <AirplaneForm />
+        <FormEditAirplane />
       </DialogContent>
     </Dialog>
   );
