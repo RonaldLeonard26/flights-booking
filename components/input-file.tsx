@@ -1,8 +1,9 @@
 'use client';
 
-import { Upload } from 'lucide-react';
+import { Trash, Trash2, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useId, useRef, useState } from 'react';
+import { Button } from './ui/button';
 
 interface PropsTypes {
   name: string;
@@ -33,6 +34,10 @@ export default function InputFile(props: PropsTypes) {
       setPreview(null);
       onChange?.(null);
     }
+  };
+
+  const handleRemove = (e: React.MouseEvent) => {
+    (e.preventDefault(), e.stopPropagation(), handleFileAction(null));
   };
 
   // pasang event listener ke ref untuk handleDrop
@@ -73,38 +78,53 @@ export default function InputFile(props: PropsTypes) {
   }, [isDropable, preview]);
 
   return (
-    <label
-      ref={dropRef}
-      htmlFor={`dropzone-file${dropzoneId}`}
-      className="w-full min-h-24 h-36 flex flex-coll  border-2 border-dashed rounded-lg p-6 items-center justify-center cursor-pointer bg-gray-50 hover:bg-gray-100"
-    >
-      {preview ? (
-        <div className=" relative flex flex-col items-center justify-center p-4">
-          <div className=" relative w-1/2 mb-2">
-            <Image fill src={preview} alt="image" className="relative!" />
+    <div className="relative w-full">
+      <label
+        ref={dropRef}
+        htmlFor={`dropzone-file${dropzoneId}`}
+        className="w-full min-h-24 h-40 flex flex-coll border-2 border-dashed rounded-lg items-center justify-center cursor-pointer bg-gray-50 hover:bg-gray-100"
+      >
+        {preview ? (
+          <div className="relative w-full h-full flex flex-col items-center justify-center ">
+            <Button
+              type="button"
+              onClick={handleRemove}
+              className="absolute top-1 right-0 text-red-400 bg-transparent hover:bg-transparent hover:cursor-pointer"
+            >
+              <Trash2 size={16} />
+            </Button>
+
+            <div className=" relative w-3/4 h-3/4 space-y-2">
+              <Image
+                fill
+                src={preview}
+                alt="image"
+                className="object-cover aspect-video rounded-md"
+              />
+            </div>
+            <p className="text-xs font-semibold text-center text-gray-500 truncate-1">
+              {uploadedImage?.name}
+            </p>
           </div>
-          <p className="text-sm font-semibold text-center text-gray-500">
-            {uploadedImage?.name}
-          </p>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center p-4">
-          <Upload className="mb-2 w-8 h-8  text-gray-400" />
-          <p className="text-sm font-semibold text-center text-gray-500">
-            {isDropable
-              ? 'Drag and drop or click to upload image'
-              : 'Click to upload image'}
-          </p>
-        </div>
-      )}
-      <input
-        name={name}
-        type="file"
-        className="hidden"
-        accept="image/*"
-        id={`dropzone-file${dropzoneId}`}
-        onChange={(e) => handleFileAction(e.target.files?.[0] || null)}
-      />
-    </label>
+        ) : (
+          <div className="flex flex-col items-center justify-center p-4">
+            <Upload className="mb-2 w-8 h-8  text-gray-400" />
+            <p className="text-sm font-semibold text-center text-gray-500">
+              {isDropable
+                ? 'Drag and drop or click to upload image'
+                : 'Click to upload image'}
+            </p>
+          </div>
+        )}
+        <input
+          name={name}
+          type="file"
+          className="hidden"
+          accept="image/*"
+          id={`dropzone-file${dropzoneId}`}
+          onChange={(e) => handleFileAction(e.target.files?.[0] || null)}
+        />
+      </label>
+    </div>
   );
 }

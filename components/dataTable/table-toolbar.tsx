@@ -12,7 +12,7 @@ export default function TableToolbar({
   setGlobalFilter,
 }: PropsTypes) {
   return (
-    <div className="flex items-center justify-between py-6">
+    <div className="flex items-center justify-between py-2">
       <Input
         placeholder="search..."
         value={globalFilter ?? ''}

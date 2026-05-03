@@ -1,7 +1,7 @@
 const LISTS_LIMIT = [
-  { label: '8', value: '8' },
-  { label: '12', value: '12' },
-  { label: '16', value: '16' },
+  { label: '6', value: '6' },
+  { label: '10', value: '12' },
+  { label: '14', value: '16' },
 ];
 
 const LIMIT_DEFAULT = LISTS_LIMIT[0].value;

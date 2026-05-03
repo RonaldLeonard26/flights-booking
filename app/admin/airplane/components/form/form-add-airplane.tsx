@@ -6,10 +6,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Trash } from 'lucide-react';
 
-import useAddAirplane from '../../hooks/useAddAirplane';
+import useAddAirplane, { AirplanePayload } from '../../hooks/useAddAirplane';
 import { Controller } from 'react-hook-form';
+import { toast } from 'sonner';
 
-export default function AirplaneForm() {
+interface PropsTypes {
+  close: () => void;
+}
+
+export default function AirplaneForm(props: PropsTypes) {
+  const { close } = props;
   // const [rows, setRows] = useState([
   //   { id: crypto.randomUUID(), name: '', code: '' },
   // ]);
@@ -31,12 +37,32 @@ export default function AirplaneForm() {
     handleSubmit,
     errors,
     control,
-    handleSave,
+    mutateAirplane,
     isPendingAirplane,
     fields,
     append,
     remove,
   } = useAddAirplane();
+
+  const handleSave = async (data: AirplanePayload) => {
+    try {
+      await mutateAirplane(data);
+      toast.success('Airplane added successfully!', {
+        duration: 3000,
+        style: {
+          fontFamily: 'Inter',
+        },
+      });
+      close();
+    } catch (error) {
+      toast.error('Failed to add airplane', {
+        duration: 3000,
+        style: {
+          fontFamily: 'Inter',
+        },
+      });
+    }
+  };
 
   return (
     <form className="flex flex-col " onSubmit={handleSubmit(handleSave)}>
@@ -117,7 +143,12 @@ export default function AirplaneForm() {
       {/* footer */}
       <div className="flex items-center justify-end mt-4">
         <div className="flex gap-2 ">
-          <Button size="sm" className="bg-gray-700">
+          <Button
+            size="sm"
+            type="button"
+            variant="destructive"
+            onClick={() => close()}
+          >
             Cancel
           </Button>
           <Button
@@ -126,7 +157,7 @@ export default function AirplaneForm() {
             size="sm"
             disabled={isPendingAirplane}
           >
-            Save
+            {isPendingAirplane ? 'adding...' : 'Save'}
           </Button>
         </div>
       </div>

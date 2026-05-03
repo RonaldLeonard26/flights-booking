@@ -36,7 +36,7 @@ export default function TablePagination<TData>({ table }: Props<TData>) {
       </Select>
 
       {/* pagination */}
-      <div className="flex items-center py-6">
+      <div className="flex items-center pt-4">
         <Button
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}

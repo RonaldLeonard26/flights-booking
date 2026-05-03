@@ -10,6 +10,18 @@ import {
 import { MoreVertical } from 'lucide-react';
 import { Button } from '../ui/button';
 import EditAirplane from '@/app/admin/airplane/components/modal/edit-modal';
+import UseDeleteAirplane from '@/app/admin/airplane/hooks/use-delete-airplane';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../ui/alert-dialog';
 
 export type Airplanes = {
   id: string;
@@ -26,7 +38,7 @@ export const columns: ColumnDef<Airplanes>[] = [
       <img
         src={row.original.image}
         alt="airplane"
-        className="w-16 h-10 object-cover rounded"
+        className="w-24 h-14 object-cover rounded"
       />
     ),
   },
@@ -41,6 +53,8 @@ export const columns: ColumnDef<Airplanes>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {
+      const { mutateDeleteAirplane, isPendingDeleteAirplane } =
+        UseDeleteAirplane();
       const plane = row.original;
       return (
         <DropdownMenu>
@@ -52,7 +66,33 @@ export const columns: ColumnDef<Airplanes>[] = [
           <DropdownMenuContent align="end">
             <EditAirplane airplane={plane} />
 
-            <DropdownMenuItem>Delete</DropdownMenuItem>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  Delete
+                </DropdownMenuItem>
+              </AlertDialogTrigger>
+              <AlertDialogContent size="sm">
+                <AlertDialogHeader className="items-start">
+                  <AlertDialogTitle className="text-md">
+                    Are you absolutely sure?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete the airplane.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel size="sm">Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => mutateDeleteAirplane(plane.id)}
+                    className="bg-rose-500 hover:bg-rose-700"
+                    size="sm"
+                  >
+                    {isPendingDeleteAirplane ? 'Deleting...' : 'Delete'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </DropdownMenuContent>
         </DropdownMenu>
       );

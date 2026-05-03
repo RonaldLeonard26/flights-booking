@@ -32,16 +32,15 @@ export default function DataTable<TData, TValue>({
   columns,
 }: DataTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState('');
+  const [pagination, setPagination] = useState({
+    pageIndex: PAGE_DEFAULT,
+    pageSize: Number(LIMIT_DEFAULT),
+  });
   const table = useReactTable({
     data,
     columns,
-    initialState: {
-      pagination: {
-        pageIndex: PAGE_DEFAULT,
-        pageSize: Number(LIMIT_DEFAULT),
-      },
-    },
-    state: { globalFilter },
+    state: { globalFilter, pagination },
+    onPaginationChange: setPagination,
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

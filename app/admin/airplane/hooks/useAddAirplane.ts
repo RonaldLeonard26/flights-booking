@@ -1,8 +1,9 @@
 import { airplaneServices } from '@/lib/services/airplane.service';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useFieldArray, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import z from 'zod';
 
 export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
@@ -20,13 +21,15 @@ const schema = z.object({
       image: z
         .any()
         .refine(
-          (file: File) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+          (file: File) => !file || ACCEPTED_IMAGE_TYPES.includes(file?.type),
           'Image format must be jpg, jpeg, or png',
         )
-        .refine(
-          (file: File) => file.size <= MAX_FILE_SIZE,
-          'Image siza max 1MB',
-        ),
+        .refine((file: File) => {
+          if (file instanceof File) {
+            return file.size <= MAX_FILE_SIZE;
+          }
+          return true;
+        }, 'Image siza max 1MB'),
     }),
   ),
 });
@@ -34,7 +37,7 @@ const schema = z.object({
 export type AirplanePayload = z.infer<typeof schema>;
 
 export default function useAddAirplane() {
-  const router = useRouter();
+  const queryQlient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -53,17 +56,18 @@ export default function useAddAirplane() {
     name: 'airplanes',
   });
 
-  const { mutate: mutateAirplane, isPending: isPendingAirplane } = useMutation({
-    mutationFn: (payload: AirplanePayload) => airplaneServices.create(payload),
-    onError: (err) => {
-      console.error(err);
-    },
-    onSuccess: () => {
-      router.refresh();
-      reset();
-    },
-  });
-  const handleSave = (data: AirplanePayload) => mutateAirplane(data);
+  const { mutateAsync: mutateAirplane, isPending: isPendingAirplane } =
+    useMutation({
+      mutationFn: (payload: AirplanePayload) =>
+        airplaneServices.create(payload),
+      onError: (err) => {
+        console.error(err);
+      },
+      onSuccess: () => {
+        reset();
+        return queryQlient.invalidateQueries({ queryKey: ['airplanes'] });
+      },
+    });
 
   return {
     register,
@@ -71,7 +75,7 @@ export default function useAddAirplane() {
     errors,
     control,
 
-    handleSave,
+    mutateAirplane,
     isPendingAirplane,
     fields,
     append,

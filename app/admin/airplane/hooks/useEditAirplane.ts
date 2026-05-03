@@ -3,7 +3,7 @@ import z from 'zod';
 import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from './useAddAirplane';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Airplanes } from '@/components/dataTable/columns';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { airplaneServices } from '@/lib/services/airplane.service';
 
 const schemaSingle = z.object({
@@ -15,20 +15,36 @@ const schemaSingle = z.object({
     .regex(/^[A-z]{3}-[0-9]{3}/, 'Example code [XXX-123]'),
   image: z
     .any()
-    .refine(
-      (file: File) => ACCEPTED_IMAGE_TYPES.includes(file.type),
-      'Image format must be jpg, jpeg, or png',
-    )
-    .refine((file: File) => {
-      if (file instanceof File) return file.size <= MAX_FILE_SIZE;
+    .refine((file) => file !== null && file !== undefined, 'Image is required')
+    .refine((file) => {
+      //jika user tidak ganti gambar
+      if (typeof file === 'string') return true;
+      //jika user ganti gambar {object file} cek type
+      if (file instanceof File) {
+        return ACCEPTED_IMAGE_TYPES.includes(file.type);
+      }
       return true;
-    }, 'Image siza max 1MB'),
+    }, 'Image format must be jpg, jpeg, or png')
+    .refine((file) => {
+      //hanya cek ukuran jika upload file baru
+      if (file instanceof File) {
+        return file.size <= MAX_FILE_SIZE;
+      }
+      return true; //jika string lewati cek size
+    }, 'Image size max 2MB'),
 });
 
 export type AirplaneSingle = z.infer<typeof schemaSingle>;
 
 export default function UseEditAirplane(airplane: Airplanes) {
-  const {} = useForm<AirplaneSingle>({
+  const queryQlient = useQueryClient();
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<AirplaneSingle>({
     resolver: zodResolver(schemaSingle),
     defaultValues: {
       code: airplane.code,
@@ -36,12 +52,27 @@ export default function UseEditAirplane(airplane: Airplanes) {
       image: airplane.image,
     },
   });
-  const { mutate: mutateEditAirplane, isPending: isPendingMutateAirplane } =
-    useMutation({
-      mutationFn: (data: AirplaneSingle) =>
-        airplaneServices.update(airplane.id, data),
-      onSuccess: () => {},
-    });
+  const {
+    mutateAsync: mutateEditAirplane,
+    isPending: isPendingMutateAirplane,
+  } = useMutation({
+    mutationFn: (data: AirplaneSingle) =>
+      airplaneServices.update(airplane.id, data),
+    onSuccess: () => {
+      reset();
+      return queryQlient.invalidateQueries({ queryKey: ['airplanes'] });
+    },
+    onError: (err) => {
+      console.error(err);
+    },
+  });
 
-  return {};
+  return {
+    register,
+    control,
+    handleSubmit,
+    errors,
+    mutateEditAirplane,
+    isPendingMutateAirplane,
+  };
 }

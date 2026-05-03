@@ -28,7 +28,7 @@ export default function AddAirplaneModal() {
             Fill the form below to add a new airplane.
           </DialogDescription>
         </DialogHeader>
-        <AirplaneForm />
+        <AirplaneForm close={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   );

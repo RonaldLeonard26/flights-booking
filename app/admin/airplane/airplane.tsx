@@ -4,8 +4,10 @@ import { columns } from '@/components/dataTable/columns';
 import DataTable from '@/components/dataTable/data-table';
 
 import UseAirplanes from './hooks/use-airplanes';
+import { useEffect, useState } from 'react';
 
 export default function Airplane() {
+  const [mounted, setMounted] = useState(false);
   const {
     dataAirplanes,
     isLoadingAirplanes,
@@ -13,10 +15,19 @@ export default function Airplane() {
     refetchAirplanes,
   } = UseAirplanes();
 
-  return (
-    <div className="w-full flex flex-col gap-6">
-      <h2>Airplane</h2>
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      setMounted(true);
+    });
 
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  if (!mounted) return null;
+
+  return (
+    <div className="w-full flex flex-col">
+      <h2>Airplane</h2>
       <DataTable data={dataAirplanes ?? []} columns={columns} />
     </div>
   );

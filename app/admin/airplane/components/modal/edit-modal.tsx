@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -7,11 +6,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import AirplaneForm from '../form/form-add-airplane';
-import { useState } from 'react';
+
+import { useEffect, useState } from 'react';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { Airplanes } from '@/components/dataTable/columns';
 import FormEditAirplane from '../form/form-edit-airplane';
+import { Airplanes } from '@/components/dataTable/columns';
 
 export default function EditAirplaneModal({
   airplane,
@@ -19,6 +18,18 @@ export default function EditAirplaneModal({
   airplane: Airplanes;
 }) {
   const [open, setOpen] = useState(false);
+  // const [mounted, setMounted] = useState(false);
+
+  // useEffect(() => {
+  //   const frame = requestAnimationFrame(() => {
+  //     setMounted(true);
+  //   });
+
+  //   return () => cancelAnimationFrame(frame);
+  // }, []);
+
+  // // Jika belum mounted, jangan render trigger yang kompleks dulu
+  // if (!mounted) return null;
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -34,7 +45,7 @@ export default function EditAirplaneModal({
             Fill the form below to edit airplane.
           </DialogDescription>
         </DialogHeader>
-        <FormEditAirplane />
+        <FormEditAirplane airplane={airplane} close={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   );

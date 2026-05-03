@@ -65,6 +65,8 @@ export const airplaneServices = {
   ) {
     let imageUrl = payload.image;
 
+    if (payload.image === 'string') return true;
+
     // jika image adalah file(user ganti gambar baru), upload ke storage dulu
     if (payload.image instanceof File) {
       const fileName = `${crypto.randomUUID()}-${payload.image.name}`;
@@ -90,5 +92,13 @@ export const airplaneServices = {
     return data;
   },
 
-  async remove() {},
+  async remove(id: string) {
+    const { data, error } = await supabase
+      .from('airplanes')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return data;
+  },
 };
